@@ -115,7 +115,7 @@ app.post("/room", middleware, async (req, res) => {
         return;
     } catch(e) {
         res.status(404).json({
-            message: "There was some error"
+            message: "Room already exists"
         })
         return;
     }
