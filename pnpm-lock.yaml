@@ -94,6 +94,9 @@ importers:
 
   apps/ws-service:
     dependencies:
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../../packages/prisma
       '@types/jsonwebtoken':
         specifier: ^9.0.7
         version: 9.0.7
