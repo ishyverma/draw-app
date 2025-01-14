@@ -63,6 +63,13 @@ app.post("/signin", async (req, res) => {
             })
             return
         }
+        
+        if(user.password != password) {
+            res.status(404).json({
+                message: "Password is incorrect"
+            })
+            return
+        }
 
         const token = jwt.sign({
             userId: user.id
@@ -92,8 +99,9 @@ app.post("/room", middleware, async (req, res) => {
 
     try {
         const room = await prisma.room.create({
-            data: {
-                name
+            data: { 
+                slug: name,
+                adminId: req.userId
             }
         })
 
@@ -108,5 +116,9 @@ app.post("/room", middleware, async (req, res) => {
         return;
     }
 }) 
+
+app.get("/room", async (req, res) => {
+    
+})
 
 app.listen(3001);
