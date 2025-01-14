@@ -1,11 +1,13 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import { middleware } from "./middleware";
 import { JWT_SECRET } from "@repo/backend-common/config";
 import { CreateUserSchema, SigninSchema, CreateRoomSchema } from "@repo/common/types";
 import { prisma } from "@repo/db/prisma";
 
 const app = express();
+app.use(express.json());
 
 app.post("/signup", async (req, res) => {
     const parsedData = CreateUserSchema.safeParse(req.body);
@@ -17,18 +19,18 @@ app.post("/signup", async (req, res) => {
     }
 
     const { name, password, username } = parsedData.data
-
+    const hashedPassword = await bcrypt.hash(password, 5);
     try {
         const user = await prisma.user.create({
             data: {
                 name,
                 username,
-                password
+                password: hashedPassword
             }
         })
 
         res.json({
-            userId: user
+            userId: user.id
         })
         return;
 
@@ -63,8 +65,10 @@ app.post("/signin", async (req, res) => {
             })
             return
         }
-        
-        if(user.password != password) {
+
+        const hashedPassword = await bcrypt.compare(password, user.password)
+
+        if(!hashedPassword) {
             res.status(404).json({
                 message: "Password is incorrect"
             })
@@ -116,9 +120,5 @@ app.post("/room", middleware, async (req, res) => {
         return;
     }
 }) 
-
-app.get("/room", async (req, res) => {
-    
-})
 
 app.listen(3001);
